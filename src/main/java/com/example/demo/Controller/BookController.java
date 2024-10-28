@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/books") // Base URL for book-related APIs
 public class BookController {
@@ -17,6 +19,12 @@ public class BookController {
     public ResponseEntity<Book> createBook(Book book) {
         bookService.createBook(book);
         return ResponseEntity.ok(book);
+    }
+
+    @GetMapping("/get/{id}")
+    public ResponseEntity<Book> getBookById(@PathVariable long id) {
+        Optional<Book> book =  bookService.getBookById(id);
+        return book.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/add")
