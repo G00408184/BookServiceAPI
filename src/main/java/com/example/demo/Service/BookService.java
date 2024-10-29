@@ -25,4 +25,22 @@ private BookRepository bookRepository;
         return bookRepository.findAll();
     }
 
+    public boolean deleteBookById(Long id) {
+        if (bookRepository.existsById(id)) {
+            bookRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean updateBookById(Long id, Book book) {
+        if (bookRepository.existsById(id)) {
+            book.setId(id);
+            bookRepository.save(book);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }
