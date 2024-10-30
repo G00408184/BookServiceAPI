@@ -1,7 +1,7 @@
 package com.example.demo.Controller;
 import com.example.demo.Service.BookService;
 import com.example.demo.entity.Book;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,8 +13,12 @@ import java.util.Optional;
 @RequestMapping("/books")
 public class BookController {
 
-    @Autowired
-    private BookService bookService;
+
+    private final BookService bookService;
+
+    public BookController(BookService bookService) {
+        this.bookService = bookService;
+    }
 
     @GetMapping("/get")
     public ResponseEntity<List<Book>> getAllBooks() {
@@ -31,7 +35,7 @@ public class BookController {
     @PostMapping("/add")
     public ResponseEntity<Book> addBook(@RequestBody Book book) {
         Book createdBook = bookService.createBook(book);
-        return ResponseEntity.ok(book);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);  // Returns 201 Created
     }
 
     @DeleteMapping("/delete/{id}")
