@@ -14,7 +14,7 @@ public class MessageProducer {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public void sendMessage(Message message) {
+    public  void sendMessage(Message message) {
         rabbitTemplate.convertAndSend("productQueue", message);
         System.out.println("Message sent to queue: " + message);
     }

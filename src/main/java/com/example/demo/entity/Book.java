@@ -1,4 +1,5 @@
 package com.example.demo.entity;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Min;
@@ -11,32 +12,39 @@ public class Book {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idBooks")
+    @Column(name = "id")  // Changed column name to "id"
     private Long id;
 
+    @JsonProperty("author")
     @NotBlank(message = "Author cannot be blank")
-    @Column(name = "Author")  // No need for nullable = false here; handled by @NotBlank
+    @Column(name = "author")
     private String author;
 
+    @JsonProperty("title")
     @NotBlank(message = "Title cannot be blank")
-    @Column(name = "Title")
+    @Column(name = "title")
     private String title;
 
-    @Column(name = "Description", length = 1000)
+    @JsonProperty("description")
+    @Column(name = "description", length = 1000)
     private String description;
 
+    @JsonProperty("copies")
     @Min(value = 1, message = "Copies must be at least 1")
-    @Column(name = "Copies", nullable = false)
+    @Column(name = "copies", nullable = false)
     private int copies;
 
+    @JsonProperty("availableCopies")
     @Min(value = 0, message = "Available copies cannot be negative")
-    @Column(name = "Available Copies", nullable = false)
+    @Column(name = "available_copies", nullable = false)
     private int availableCopies;
 
-    @Column(name = "Category")
+    @JsonProperty("category")
+    @Column(name = "category")
     private String category;
 
+    @JsonProperty("language")
     @NotBlank(message = "Language cannot be blank")
-    @Column(name = "Language")
+    @Column(name = "language")
     private String language;
 }

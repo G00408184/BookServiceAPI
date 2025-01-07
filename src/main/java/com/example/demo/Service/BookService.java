@@ -1,25 +1,62 @@
 package com.example.demo.Service;
 
+import com.example.demo.MessageQueue.Message;
+import com.example.demo.MessageQueue.MessageProducer;
 import com.example.demo.Repository.BookRepository;
 import com.example.demo.entity.Book;
+import com.example.demo.feign.BookClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class BookService {
-
+    @Autowired
     private final BookRepository bookRepository;
 
-    public BookService(BookRepository bookRepository) {
+    @Autowired
+    private final BookClient bookClient;
+
+    @Autowired
+     private final MessageProducer messageProducer;
+
+    HashMap<Integer, Book> spare = new HashMap<>();
+
+    public BookService(BookRepository bookRepository, BookClient bookClient,MessageProducer messageProducer ) {
         this.bookRepository = bookRepository;
+        this.bookClient = bookClient;
+        this.messageProducer = messageProducer;
     }
 
     public Book createBook(Book book) {
-        return bookRepository.save(book);
+        // ask for admin permission
+        Message message = new Message();
+        message.setId(String.valueOf(System.currentTimeMillis()));
+        message.setTimestamp(LocalDateTime.now().toString());
+        message.setType("Book");
+        message.setEmail("doesnotmatter@gmail.com");
+        int code = generateRandomNumber(1,100000);
+        message.setContent(String.valueOf(code));
+        messageProducer.sendMessage(message);
+        spare.put(code, book);
+        createBookGranted(code);
+        return book;
     }
 
+    public void createBookGranted(int id) {
+        Book book = spare.get(id);
+        spare.remove(id);
+        bookRepository.save(book);
+    }
+
+    public int generateRandomNumber(int min, int max) {
+        return ThreadLocalRandom.current().nextInt(min, max + 1);
+    }
     public Optional<Book> getBookById(Long id) {
         return bookRepository.findById(id);
     }
@@ -33,6 +70,14 @@ public class BookService {
     }
 
     public boolean deleteBook(String title, String author) {
+
+        // Check if there are any loans for the book
+        List<com.example.demo.entity.Loan> loans = bookClient.getLoanByTitleAndAuthor(title, author);
+
+        if (loans != null && !loans.isEmpty()) {
+            throw new RuntimeException("Cannot delete book: Active loans exist for this book.");
+        }
+
         Optional<Book> book = bookRepository.findBookByTitleAndAuthor(title, author);
         if (bookRepository.findBookByTitleAndAuthor(title, author).isPresent()) {
             bookRepository.deleteById(book.get().getId());

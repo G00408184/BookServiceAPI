@@ -1,11 +1,15 @@
 package com.example.demo.Controller;
 
+import com.example.demo.MessageQueue.Message;
+import com.example.demo.MessageQueue.MessageProducer;
 import com.example.demo.Service.BookService;
 import com.example.demo.entity.Book;
+import com.example.demo.entity.Loan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,12 +43,20 @@ public class BookController {
     
     @PostMapping("/add")
     public ResponseEntity<Book> addBook(@RequestBody Book book) {
+        // Ask for Admin permission
         Book createdBook = bookService.createBook(book);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
+    }
+    @PostMapping("/addGranted/{id}")
+    public void addBookGranted(@PathVariable int id) {
+        // Ask for Admin permission
+        bookService.createBookGranted(id);
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteBook(@RequestParam String title, @RequestParam String author) {
+        // Check if all the loans are completed
+
         if (bookService.deleteBook(title, author)) {
             return ResponseEntity.noContent().build();
         }
@@ -79,22 +91,13 @@ public class BookController {
     }
 
     @PatchMapping("/decreaseCopies")
-    public ResponseEntity<String> decreaseCopies(@RequestParam String title, @RequestParam String author) {
-        boolean success = bookService.decrementAvailableCopies(title, author);
-        if (success) {
-            return ResponseEntity.ok("Copies decreased successfully");
-        }
-        return ResponseEntity.badRequest().body("Failed to decrease copies (not enough copies or book not found)");
+    public boolean decreaseCopies(@RequestParam String title, @RequestParam String author) {
+        return bookService.decrementAvailableCopies(title, author);
     }
 
     @PatchMapping("/incrementCopies")
-    public ResponseEntity<String> incrementCopies(@RequestParam String title, @RequestParam String author) {
-        boolean success = bookService.incrementAvailableCopies(title, author);
-        if (success) {
-            return ResponseEntity.ok("Copies incremented successfully");
-        }
-        return ResponseEntity.badRequest().body("Failed to increment copies (book not found)");
+    public boolean incrementCopies(@RequestParam String title, @RequestParam String author) {
+       return bookService.incrementAvailableCopies(title, author);
     }
-
 
 }
