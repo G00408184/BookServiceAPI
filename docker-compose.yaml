@@ -1,0 +1,40 @@
+version: '3.1'
+
+services:
+  # MySQL Container for the book microservice
+  db:
+    image: mysql:latest
+    restart: always
+    ports:
+      - "3308:3306"  # Changed to a unique port to avoid conflicts
+    environment:
+      MYSQL_DATABASE: book
+      MYSQL_ROOT_PASSWORD: Password
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+    # Health check to ensure MySQL is ready before starting the service
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 5
+
+  # New Microservice (book-service)
+  book-service:
+    build:
+      context: .
+      dockerfile: ./src/main/DockerBase/Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/book
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Password
+      SPRING_RABBITMQ_ADDRESSES: amqp://rabbitmq:5672  # External RabbitMQ reference
+    depends_on:
+      db:
+        condition: service_healthy  # Wait for MySQL to be ready
+
+volumes:
+  mysql-data:
+    driver: local

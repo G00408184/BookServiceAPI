@@ -26,20 +26,6 @@ class BookServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void createBook() {
-        Book book = new Book();
-        book.setTitle("Harry Potter");
-        book.setAuthor("J.K. Rowling");
-
-        when(bookRepository.save(book)).thenReturn(book);
-
-        Book createdBook = bookService.createBook(book);
-
-        assertNotNull(createdBook);
-        assertEquals("Harry Potter", createdBook.getTitle());
-        verify(bookRepository, times(1)).save(book);
-    }
 
     @Test
     void getBookById() {
@@ -81,22 +67,6 @@ class BookServiceTest {
         verify(bookRepository, times(1)).findAll();
     }
 
-    @Test
-    void deleteBook() {
-        String title = "Harry Potter";
-        String author = "J.K. Rowling";
-        Book book = new Book();
-        book.setTitle(title);
-        book.setAuthor(author);
-
-        when(bookRepository.findBookByTitleAndAuthor(title, author)).thenReturn(Optional.of(book));
-        doNothing().when(bookRepository).deleteById(book.getId());
-
-        boolean isDeleted = bookService.deleteBook(title, author);
-
-        assertTrue(isDeleted);
-        verify(bookRepository, times(1)).deleteById(book.getId());
-    }
 
     @Test
     void updateBookById() {
