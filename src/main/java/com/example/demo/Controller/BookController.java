@@ -48,9 +48,11 @@ public class BookController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
     }
     @PostMapping("/addGranted/{id}")
-    public void addBookGranted(@PathVariable int id) {
+    public void addBookGranted(@PathVariable String id) {
+       int Bookid = Integer.parseInt(id);
+
         // Ask for Admin permission
-        bookService.createBookGranted(id);
+        bookService.createBookGranted(Bookid);
     }
 
     @DeleteMapping("/delete")

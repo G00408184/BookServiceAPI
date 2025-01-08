@@ -86,9 +86,39 @@
 
     <build>
         <plugins>
+            <!-- Spring Boot Maven Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- ✅ Fabric8 Docker Plugin (No Credentials Required) -->
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.38.1</version>
+                <executions>
+                    <execution>
+                        <id>docker-build</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <images>
+                        <image>
+                            <!-- ✅ Use your Docker Hub repo here -->
+                            <name>rayan1605/bookser-book-service:latest</name>
+                            <build>
+                                <dockerFileDir>${project.basedir}</dockerFileDir>
+                            </build>
+                            <registry>docker.io</registry>
+                        </image>
+                    </images>
+                </configuration>
             </plugin>
         </plugins>
     </build>
