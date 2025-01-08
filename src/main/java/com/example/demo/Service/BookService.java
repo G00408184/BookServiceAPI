@@ -38,10 +38,10 @@ public class BookService {
         Message message = new Message();
         message.setId(String.valueOf(System.currentTimeMillis()));
         message.setTimestamp(LocalDateTime.now().toString());
-        message.setType("Book");
+        message.setContent("Book");
         message.setEmail("doesnotmatter@gmail.com");
         int code = generateRandomNumber(1,100000);
-        message.setContent(String.valueOf(code));
+        message.setType(String.valueOf(code));
         messageProducer.sendMessage(message);
         spare.put(code, book);
         createBookGranted(code);
@@ -49,9 +49,13 @@ public class BookService {
     }
 
     public void createBookGranted(int id) {
-        Book book = spare.get(id);
-        spare.remove(id);
-        bookRepository.save(book);
+        if (spare.containsKey(id)) {
+            Book book = spare.get(id);
+            spare.remove(id);
+            bookRepository.save(book);
+        } else {
+            System.out.println("Book with ID " + id + " not found in spare storage.");
+        }
     }
 
     public int generateRandomNumber(int min, int max) {
